@@ -28,7 +28,9 @@ services:
       - cloudflared_portainer
 
   frontend-webapp:
-    build: ./frontend-webapp
+    build: 
+      context: .
+      dockerfile: Dockerfile.frontend
     container_name: frontend-webapp
     networks:
       - cloudflared_frontend

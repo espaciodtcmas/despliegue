@@ -1,8 +1,9 @@
 FROM node:lts-alpine3.19 AS builder
-RUN mkdir ./home/luiszamorano
-COPY ./git/ ./home/luiszamorano
+RUN apk add --no-cache git
+RUN mkdir -p /home/luiszamorano
+RUN git clone https://github.com/espaciodtcmas/frontend-webapp.git /home/luiszamorano
 WORKDIR /home/luiszamorano
-RUN npm i
+RUN npm install
 RUN npm run build
 CMD tail -f /dev/null
 
