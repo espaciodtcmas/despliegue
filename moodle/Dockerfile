@@ -1,5 +1,17 @@
 FROM php:8.3.13-fpm-alpine
 
+RUN apk add --no-cache \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libxml2-dev \
+    libzip-dev \
+    openssl-dev \
+    libcurl \
+    freetype-dev \
+    icu-dev \
+    oniguruma-dev \
+    bash
+
 
 COPY moodle-latest-405.tgz /var/www/html/moodle.tgz
 
@@ -13,9 +25,10 @@ RUN mkdir -p /var/www/moodledata && \
     chown -R www-data:www-data /var/www/moodledata && \
     chmod -R 777 /var/www/moodledata
 
+
 EXPOSE 80
 
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-COPY ./start.sh .
-RUN  chmod +x ./start.sh
-CMD ["./start.sh"]
+CMD ["/start.sh"]
