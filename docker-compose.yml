@@ -1,25 +1,56 @@
 version: '3.8'
-
 services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel run e8422924-f71f-428c-a144-7fdc2ca71413
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - cloudflared_network
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    networks:
+      - cloudflared_network
+
   frontend-webapp:
     build: ./frontend-webapp
     container_name: frontend-webapp
     ports:
       - "82:80"
+    networks:
+      - cloudflared_network
 
   postgres:
     image: postgres
     restart: always
     environment:
-    - POSTGRES_PASSWORD=${POSTGRES_USER}
-    - POSTGRES_USER=${POSTGRES_USER}
-    - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=postgres
+    networks:
+      - cloudflared_network
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 9090:8080
+    networks:
+      - cloudflared_network
 
   mariadb:
     image: docker.io/bitnami/mariadb:11.4
@@ -35,6 +66,8 @@ services:
       - 'mariadb_data:/bitnami/mariadb'
     ports:
       - "3306:3306"
+    networks:
+      - cloudflared_network
 
   moodle:
     image: docker.io/bitnami/moodle:4.5
@@ -55,8 +88,8 @@ services:
     ports:
       - "8080:8080"
       - "8443:8443"
-
-  
+    networks:
+      - cloudflared_network
 
 volumes:
   mariadb_data:
@@ -65,3 +98,9 @@ volumes:
     driver: local
   moodledata_data:
     driver: local
+  portainer_data:
+    driver: local
+
+networks:
+  cloudflared_network:
+    driver: bridge
