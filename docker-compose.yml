@@ -1,8 +1,19 @@
 version: '3.8'
-
 services:
   frontend-webapp:
     build: ./frontend-webapp
     container_name: frontend-webapp
     ports:
       - "82:80"
+
+  moodle:
+    build: ./moodle
+    container_name: moodle
+    ports:
+      - "81:80"
+    volumes:
+      - moodle_data:/var/www/moodledata
+    restart: unless-stopped
+
+volumes:
+  moodle_data:
