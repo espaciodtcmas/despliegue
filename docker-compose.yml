@@ -1,1 +1,8 @@
-# iniciando proyecto
+version: '3.8'
+
+services:
+  frontend-webapp:
+    build: ./frontend-webapp
+    container_name: frontend-webapp
+    ports:
+      - "82:80"
