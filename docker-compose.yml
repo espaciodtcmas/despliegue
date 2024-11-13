@@ -8,7 +8,11 @@ services:
       - .env
     restart: always
     networks:
-      - cloudflared_network
+      - cloudflared_internet
+      - cloudflared_portainer
+      - cloudflared_frontend
+      - cloudflared_moodle
+      - cloudflared_adminer
 
   portainer:
     image: portainer/portainer-ce:latest
@@ -20,19 +24,15 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer_data:/data
-    ports:
-      - "9443:9443"
-      - "9000:9000"
     networks:
-      - cloudflared_network
+      - cloudflared_portainer
 
   frontend-webapp:
     build: ./frontend-webapp
     container_name: frontend-webapp
-    ports:
-      - "82:80"
     networks:
-      - cloudflared_network
+      - cloudflared_frontend
+      - webapp
 
   postgres:
     image: postgres
@@ -42,15 +42,13 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=postgres
     networks:
-      - cloudflared_network
+      - webapp
 
   adminer:
     image: adminer
     restart: always
-    ports:
-      - 9090:8080
     networks:
-      - cloudflared_network
+      - cloudflared_adminer
 
   mariadb:
     image: docker.io/bitnami/mariadb:11.4
@@ -64,10 +62,8 @@ services:
       - MARIADB_COLLATE=utf8mb4_unicode_ci
     volumes:
       - 'mariadb_data:/bitnami/mariadb'
-    ports:
-      - "3306:3306"
     networks:
-      - cloudflared_network
+      - moodle
 
   moodle:
     image: docker.io/bitnami/moodle:4.5
@@ -85,11 +81,9 @@ services:
       - 'moodledata_data:/bitnami/moodledata'
     depends_on:
       - mariadb
-    ports:
-      - "8080:8080"
-      - "8443:8443"
     networks:
-      - cloudflared_network
+      - cloudflared_moodle
+      - moodle
 
 volumes:
   mariadb_data:
@@ -102,5 +96,17 @@ volumes:
     driver: local
 
 networks:
-  cloudflared_network:
+  cloudflared_internet:
     driver: bridge
+  cloudflared_portainer:
+    internal: true
+  cloudflared_frontend:
+    internal: true
+  cloudflared_moodle:
+    internal: true
+  cloudflared_adminer:
+    internal: true
+  webapp:
+    internal: true
+  moodle:
+    internal: true
